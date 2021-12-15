@@ -13,7 +13,9 @@
 
 # Some other custom
 videos/
-sodistec/contrib/yolo/*
+sodistec/contrib/yolo/coco.names
+sodistec/contrib/yolo/yolov3.cfg
+sodistec/contrib/yolo/yolov3.weights
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

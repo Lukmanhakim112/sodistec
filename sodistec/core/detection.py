@@ -10,7 +10,10 @@ from sodistec.apps import config
 from sodistec.contrib.multicapture import CaptureThread
 
 class DetectPerson:
-    def __init__(self, video_input, detect: str = "person" ,use_gpu: bool = config.USE_GPU, use_threading: bool = config.USE_THREADING):
+    def __init__(self, video_input, detect: str = "person", 
+                 use_gpu: bool = config.USE_GPU,
+                 use_threading: bool = config.USE_THREADING
+                 ) -> None:
 
         self.detect = detect
         self.model = cv2.dnn.readNetFromDarknet(
@@ -25,19 +28,19 @@ class DetectPerson:
 
         self._set_video_capture(video_input, use_threading)
 
-    def _set_video_capture(self, video_input, use_threading):
+    def _set_video_capture(self, video_input, use_threading) -> None:
         print("[INFO] Capturing video feed...")
         if use_threading:
             self.video_capture = CaptureThread(video_input)
         else:
             self.video_capture = cv2.VideoCapture(video_input)
 
-    def _use_gpu(self):
+    def _use_gpu(self) -> None:
         print("[INFO] Searching for compatible NVIDIA GPU...")
         self.model.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         self.model.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
-    def _detect_people(self, frame, person_index: int = 0):
+    def _detect_people(self, frame, person_index: int = 0) -> list:
         # grab the dimensions of the frame and  initialize the list of
         # results
         (H, W) = frame.shape[:2]
@@ -113,7 +116,7 @@ class DetectPerson:
 
         return results
 
-    def run(self):
+    def run(self) -> None:
         while True:
             # read the next frame from the file
             if config.USE_THREADING:
