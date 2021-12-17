@@ -1,5 +1,9 @@
+from itertools import chain
+
 import numpy as np
 from cv2 import cv2
+
+from PyQt5 import QtGui
 
 import imutils
 #  from imutils.video import FPS
@@ -29,7 +33,7 @@ class DetectPerson:
         self._set_video_capture(video_input, use_threading)
 
     def _set_video_capture(self, video_input, use_threading) -> None:
-        print("[INFO] Capturing video feed...")
+        print("[INFO] Setup video feed...")
         if use_threading:
             self.video_capture = CaptureThread(video_input)
         else:
@@ -60,12 +64,11 @@ class DetectPerson:
         centroids = []
         confidences = []
 
-        # loop over each of the layer outputs
+        for detection in list(chain.from_iterable(zip(*layerOutputs))):
+            pass
+
         for output in layerOutputs:
-            # loop over each of the detections
             for detection in output:
-                # extract the class ID and confidence (i.e., probability)
-                # of the current object detection
                 scores = detection[5:]
                 class_id = np.argmax(scores)
                 confidence = scores[class_id]
@@ -97,7 +100,7 @@ class DetectPerson:
         # bounding boxes
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, config.MIN_CONF, config.NMS_THRESH)
         if config.SHOW_PEOPLE_COUNTER:
-            human_count = "Human count: {}".format(len(idxs))
+            human_count = "Total Orang: {}".format(len(idxs))
             cv2.putText(frame, human_count, (470, frame.shape[0] - 75), cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 0), 2)
 
         # ensure at least one detection exists
@@ -117,11 +120,11 @@ class DetectPerson:
         return results
 
     def run(self) -> None:
+        print("[INFO] Runing...")
         while True:
             # read the next frame from the file
             if config.USE_THREADING:
                 frame = self.video_capture.read()
-
             else:
                 (grabbed, frame) = self.video_capture.read()
                 # if the frame was not grabbed, then we have reached the end of the stream
@@ -142,24 +145,23 @@ class DetectPerson:
                 # extract all centroids from the results and compute the
                 # Euclidean distances between all pairs of the centroids
                 centroids = np.array([r[2] for r in results])
-                D = dist.cdist(centroids, centroids, metric="euclidean")
+                data = dist.cdist(centroids, centroids, metric="euclidean")
 
                 # loop over the upper triangular of the distance matrix
-                for i in range(0, D.shape[0]):
-                    for j in range(i + 1, D.shape[1]):
+                for i in range(0, data.shape[0]):
+                    for j in range(i + 1, data.shape[1]):
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        if D[i, j] < config.MIN_DISTANCE:
-                            # update our violation set with the indexes of the centroid pairs
+                        if data[i, j] < config.MIN_DISTANCE:
                             serious.add(i)
                             serious.add(j)
-                        # update our abnormal set if the centroid distance is below max distance limit
-                        if (D[i, j] < config.MAX_DISTANCE) and not serious:
+                        #  and not serious
+                        elif (data[i, j] < config.MAX_DISTANCE):
                             abnormal.add(i)
                             abnormal.add(j)
 
             # loop over the results 
-            for (i, (prob, bbox, centroid)) in enumerate(results):
+            for (i, (_, bbox, centroid)) in enumerate(results):
                 # extract the bounding box and centroid coordinates, then
                 # initialize the color of the annotation
                 (startX, startY, endX, endY) = bbox
@@ -177,32 +179,28 @@ class DetectPerson:
                 cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
                 cv2.circle(frame, (cX, cY), 5, color, 2)
 
-                
-                # draw some of the parameters
-                Safe_Distance = "Safe distance: >{} px".format(config.MAX_DISTANCE)
-                cv2.putText(frame, Safe_Distance, (470, frame.shape[0] - 25),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
-                Threshold = "Threshold limit: {}".format(config.THERESHOLD)
-                cv2.putText(frame, Threshold, (470, frame.shape[0] - 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
+            # draw some of the parameters
+            Safe_Distance = "Jarak aman: >{} px".format(config.MAX_DISTANCE)
+            cv2.putText(frame, Safe_Distance, (470, frame.shape[0] - 25),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
+            Threshold = "Limit: {}".format(config.THERESHOLD)
+            cv2.putText(frame, Threshold, (470, frame.shape[0] - 50),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
 
-                # draw the total number of social distancing violations on the output frame
-                text = "Total serious violations: {}".format(len(serious))
-                cv2.putText(frame, text, (10, frame.shape[0] - 55),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 255), 2)
+            # draw the total number of social distancing violations on the output frame
+            text = "Total serious violations: {}".format(len(serious))
+            cv2.putText(frame, text, (10, frame.shape[0] - 55),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 255), 2)
 
-                text1 = "Total abnormal violations: {}".format(len(abnormal))
-                cv2.putText(frame, text1, (10, frame.shape[0] - 25),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 255, 255), 2)
+            text1 = "Total abnormal violations: {}".format(len(abnormal))
+            cv2.putText(frame, text1, (10, frame.shape[0] - 25),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 255, 255), 2)
 
+            cv2.imshow("Testing", frame)
+            key = cv2.waitKey(1) & 0xFF
 
-                cv2.imshow("Testing", frame)
-                key = cv2.waitKey(1) & 0xFF
-
-                # if the `q` key was pressed, break from the loop
-                if key == ord("q"):
-                    break
-
-
+            # if the `q` key was pressed, break from the loop
+            if key == ord("q"):
+                break
 
 
