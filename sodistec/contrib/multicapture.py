@@ -1,36 +1,36 @@
-import queue, threading
+import threading
+from multiprocessing import Process, Pool
 
 from cv2 import cv2
 
 class CaptureThread:
     def __init__(self, input_name) -> None:
-        # Select input capture i.e: camera
         self.capture = cv2.VideoCapture(input_name)
+        (self.grabed, self.frame) = self.capture.read()
 
-        # define empty queue
-        self.queue = queue.Queue()
+        self.stopped = False
 
-        # Create and start threading daemon
-        t = threading.Thread(target=self._reader)
+    def start(self):
+        # Create and start threading
+        t = threading.Thread(target=self._update)
         t.daemon = True
         t.start()
+        #  p = Pool()
+        #  p.imap(self._update, self.frame)
+        
+        return self
 
-    def _reader(self) -> None:
+    def _stop(self) -> None:
+        self.stopped = True
+
+    def _update(self):
         while True:
-            (ret, frame) = self.capture.read()
 
-            # exit when ret not supplied
-            if not ret:
+            if self.stopped:
                 break
-
-            if not self.queue.empty():
-                try:
-                    self.queue.get_nowait()
-                except queue.Empty:
-                    pass
-
-            self.queue.put(frame)
+            (self.grabed, self.frame) = self.capture.read()
 
     def read(self):
-        return self.queue.get()
+        return self.frame
+
 

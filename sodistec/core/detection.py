@@ -1,27 +1,34 @@
-from itertools import chain
+import time
 
 import numpy as np
+
 from cv2 import cv2
 
-from PyQt5 import QtGui
-
-import imutils
-#  from imutils.video import FPS
+from PyQt5.QtCore import QThread, pyqtSignal
 
 from scipy.spatial import distance as dist
 
 from sodistec.apps import config
+from sodistec.contrib.yolo import yolo
 from sodistec.contrib.multicapture import CaptureThread
 
-class DetectPerson:
+class DetectPerson(QThread):
+    change_pixmap_signal = pyqtSignal(np.ndarray)
+    total_violations_signal = pyqtSignal(int)
+    total_serious_violations_signal = pyqtSignal(int)
+    total_people_signal = pyqtSignal(int)
+    safe_distance_signal = pyqtSignal(int)
+
     def __init__(self, video_input, detect: str = "person", 
                  use_gpu: bool = config.USE_GPU,
-                 use_threading: bool = config.USE_THREADING
+                 use_threading: bool = config.USE_THREADING,
+                 parent = None
                  ) -> None:
+        super(DetectPerson, self).__init__(parent)
 
         self.detect = detect
         self.model = cv2.dnn.readNetFromDarknet(
-            config.YOLO_CONFIG_PATH, config.YOLO_WEIGHT_PATH
+            yolo.YOLO4_MINI_CONFIG_PATH, yolo.YOLO4_MINI_WEIGHT_PATH
         )
 
         layer = self.model.getLayerNames()
@@ -35,7 +42,7 @@ class DetectPerson:
     def _set_video_capture(self, video_input, use_threading) -> None:
         print("[INFO] Setup video feed...")
         if use_threading:
-            self.video_capture = CaptureThread(video_input)
+            self.video_capture = CaptureThread(video_input).start()
         else:
             self.video_capture = cv2.VideoCapture(video_input)
 
@@ -64,19 +71,14 @@ class DetectPerson:
         centroids = []
         confidences = []
 
-        for detection in list(chain.from_iterable(zip(*layerOutputs))):
-            pass
-
         for output in layerOutputs:
             for detection in output:
                 scores = detection[5:]
                 class_id = np.argmax(scores)
                 confidence = scores[class_id]
 
-                # filter detections by (1) ensuring that the object
-                # detected was a person and (2) that the minimum
                 # confidence is met
-                if class_id == person_index and confidence > config.MIN_CONF:
+                if confidence > config.MIN_CONF:
                     # scale the bounding box coordinates back relative to
                     # the size of the image, keeping in mind that YOLO
                     # actually returns the center (x, y)-coordinates of
@@ -99,9 +101,10 @@ class DetectPerson:
         # apply non-maxima suppression to suppress weak, overlapping
         # bounding boxes
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, config.MIN_CONF, config.NMS_THRESH)
-        if config.SHOW_PEOPLE_COUNTER:
-            human_count = "Total Orang: {}".format(len(idxs))
-            cv2.putText(frame, human_count, (470, frame.shape[0] - 75), cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 0), 2)
+        self.total_people_signal.emit(len(idxs))
+        #  if config.SHOW_PEOPLE_COUNTER:
+        #      human_count = "Total Orang: {}".format(len(idxs))
+        #      cv2.putText(frame, human_count, (470, frame.shape[0] - 75), cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 0), 2)
 
         # ensure at least one detection exists
         if len(idxs) > 0:
@@ -114,17 +117,16 @@ class DetectPerson:
                 # update our results list to consist of the person
                 # prediction probability, bounding box coordinates,
                 # and the centroid
-                r = (confidences[i], (x, y, x + w, y + h), centroids[i])
-                results.append(r)
+                results.append((confidences[i], (x, y, x + w, y + h), centroids[i]))
 
         return results
 
     def run(self) -> None:
-        print("[INFO] Runing...")
         while True:
             # read the next frame from the file
             if config.USE_THREADING:
                 frame = self.video_capture.read()
+                time.sleep(0.01)
             else:
                 (grabbed, frame) = self.video_capture.read()
                 # if the frame was not grabbed, then we have reached the end of the stream
@@ -132,7 +134,8 @@ class DetectPerson:
                     break
 
             # resize the frame and then detect people (and only people) in it
-            frame = imutils.resize(frame, width=700)
+            #  frame = imutils.resize(frame, width=640)
+            frame  = cv2.resize(frame, (640, 480), cv2.INTER_LINEAR)
             results = self._detect_people(frame, person_index=config.LABELS.index("person"))
 
             # initialize the set of indexes that violate the max/min social distance limits
@@ -155,7 +158,6 @@ class DetectPerson:
                         if data[i, j] < config.MIN_DISTANCE:
                             serious.add(i)
                             serious.add(j)
-                        #  and not serious
                         elif (data[i, j] < config.MAX_DISTANCE):
                             abnormal.add(i)
                             abnormal.add(j)
@@ -179,28 +181,27 @@ class DetectPerson:
                 cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
                 cv2.circle(frame, (cX, cY), 5, color, 2)
 
-            # draw some of the parameters
-            Safe_Distance = "Jarak aman: >{} px".format(config.MAX_DISTANCE)
-            cv2.putText(frame, Safe_Distance, (470, frame.shape[0] - 25),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
-            Threshold = "Limit: {}".format(config.THERESHOLD)
-            cv2.putText(frame, Threshold, (470, frame.shape[0] - 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
+            #  # draw some of the parameters
+            #  Safe_Distance = "Jarak aman: > {}px".format(config.MAX_DISTANCE)
+            #  cv2.putText(frame, Safe_Distance, (470, frame.shape[0] - 25),
+            #      cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
+            #  self.safe_distance_signal.emit(config.MAX_DISTANCE)
 
-            # draw the total number of social distancing violations on the output frame
-            text = "Total serious violations: {}".format(len(serious))
-            cv2.putText(frame, text, (10, frame.shape[0] - 55),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 255), 2)
+            #  Threshold = "Maksimal pelanggaran: {}".format(config.THERESHOLD)
+            #  cv2.putText(frame, Threshold, (470, frame.shape[0] - 50),
+            #      cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
 
-            text1 = "Total abnormal violations: {}".format(len(abnormal))
-            cv2.putText(frame, text1, (10, frame.shape[0] - 25),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 255, 255), 2)
+            #  # draw the total number of social distancing violations on the output frame
+            #  text = "Total pelanggaran serius: {}".format(len(serious))
+            #  cv2.putText(frame, text, (10, frame.shape[0] - 55),
+            #      cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 255), 2)
+            self.total_serious_violations_signal.emit(len(serious))
 
-            cv2.imshow("Testing", frame)
-            key = cv2.waitKey(1) & 0xFF
+            #  text1 = "Total pelanggaran: {}".format(len(abnormal))
+            #  cv2.putText(frame, text1, (10, frame.shape[0] - 25),
+            #      cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 255, 255), 2)
+            self.total_violations_signal.emit(len(abnormal))
 
-            # if the `q` key was pressed, break from the loop
-            if key == ord("q"):
-                break
-
+            #  cv2.imshow("Testing", frame)
+            self.change_pixmap_signal.emit(frame)
 
