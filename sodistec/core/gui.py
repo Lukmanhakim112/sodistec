@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QFont, QImage, QPixmap
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (
     QGridLayout, QLabel, QLineEdit,
     QPushButton, QWidget
@@ -24,8 +24,6 @@ class WindowApp(QWidget):
         self.grid = QGridLayout(self)
         self.grid.setRowMinimumHeight(0, self.WIDGET_HEIGHT)
 
-        #  self.grid.setColumnStretch(2, 0.5)
-        
         self._set_font()
         self._init_ui()
 
@@ -54,6 +52,7 @@ class WindowApp(QWidget):
 
         self.opencv_box = QLabel(self)
         self.opencv_box.resize(1280, 720)
+        self.opencv_box.setAlignment(Qt.AlignCenter)
         
         b_min_distance = QPushButton("Simpan jarak minimal", self)
         self._add_to_grid(QLabel("Jarak minimal: ", self), 0, 0)
@@ -69,30 +68,18 @@ class WindowApp(QWidget):
 
         self._add_to_grid(self.opencv_box, 2, 0, 1, 3)
 
-        # Label
         self.total_violations = QLabel("Total Pelanggaran: 10")
         self.total_violations.setFont(self.qfont)
         self._add_to_grid(self.total_violations, 3, 0)
-        #  # Counter
-        #  self.total_violations = QLabel("0")
-        #  self.total_violations.setFont(self.qfont)
-        #  self._add_to_grid(self.total_violations, 3, 1)
 
-        # Label
         self.serious_violations = QLabel("Total Pelanggaran Serius: 10")
         self.serious_violations.setFont(self.qfont)
         self._add_to_grid(self.serious_violations, 4, 0)
-        #  # Counter
-        #  self.total_serious_violations = QLabel("0")
-        #  self.total_serious_violations.setFont(self.qfont)
-        #  self._add_to_grid(self.total_serious_violations, 4, 1)
 
-        # Label
         self.total_people = QLabel("Total Orang: 10")
         self.total_people.setFont(self.qfont)
         self._add_to_grid(self.total_people, 3, 1)
         
-        # Label
         self.maximum_distance = QLabel(f'Jarak Maksimal: {config.MAX_DISTANCE}')
         self.maximum_distance.setFont(self.qfont)
         self._add_to_grid(self.maximum_distance, 4, 1)
@@ -100,7 +87,6 @@ class WindowApp(QWidget):
         b_min_distance.clicked.connect(self._min_distance)
         b_max_distance.clicked.connect(self._max_distance)
 
-        # "..\\..\\videos\\test.mp4"
         self.video_input = DetectPerson(0)
         # connect image from opencv to qt
         self.video_input.change_pixmap_signal.connect(self.update_image)
@@ -108,6 +94,7 @@ class WindowApp(QWidget):
         # some parameters from openct, passed to qt
         self.video_input.total_violations_signal.connect(self._update_total_violations)
         self.video_input.total_people_signal.connect(self._update_total_person)
+        self.video_input.total_serious_violations_signal.connect(self._update_total_serious_violations)
 
         self.video_input.start()
 
@@ -130,7 +117,7 @@ class WindowApp(QWidget):
 
     @pyqtSlot(int)
     def _update_total_serious_violations(self, total_serious_violations) -> None:
-        self.total_serious_violations.setText(f'Total Pelanggaran Serius: {total_serious_violations}')
+        self.serious_violations.setText(f'Total Pelanggaran Serius: {total_serious_violations}')
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img) -> None:

@@ -19,7 +19,7 @@ MAX_DISTANCE = 80
 
 # Define minimum probability to filter weak detection
 # with the threashold when applying non-maxima suppression
-MIN_CONF = 0.3
+MIN_CONF = 0.2
 NMS_THRESH = 0.3
 
 # Use GPU for the computations
