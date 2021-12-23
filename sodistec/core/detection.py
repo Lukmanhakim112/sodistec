@@ -78,7 +78,7 @@ class DetectPerson(QThread):
                 confidence = scores[class_id]
 
                 # confidence is met
-                if confidence > config.MIN_CONF:
+                if class_id == person_index and confidence > config.MIN_CONF:
                     # scale the bounding box coordinates back relative to
                     # the size of the image, keeping in mind that YOLO
                     # actually returns the center (x, y)-coordinates of

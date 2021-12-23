@@ -6,5 +6,5 @@ YOLO_WEIGHT_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "yolov
 YOLO_CONFIG_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), 'yolov3.cfg')
 YOLO_COCO_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), 'coco.names')
 
-YOLO4_MINI_WEIGHT_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "yolov3.weights")
-YOLO4_MINI_CONFIG_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), 'yolov3.cfg')
+YOLO4_MINI_WEIGHT_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), "yolov4-tiny.weights")
+YOLO4_MINI_CONFIG_PATH = os.path.join(pathlib.Path(__file__).parent.absolute(), 'yolov4-tiny.cfg')
