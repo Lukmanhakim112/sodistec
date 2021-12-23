@@ -2,7 +2,10 @@ import time
 
 import numpy as np
 
-from cv2 import cv2
+try:
+    from cv2 import cv2
+except ImportError:
+    import cv2
 
 from PyQt5.QtCore import QThread, pyqtSignal
 

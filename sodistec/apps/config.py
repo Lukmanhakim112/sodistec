@@ -23,7 +23,7 @@ MIN_CONF = 0.2
 NMS_THRESH = 0.3
 
 # Use GPU for the computations
-USE_GPU = False
+USE_GPU = True
 
 # Show counter for the people
 SHOW_PEOPLE_COUNTER = True

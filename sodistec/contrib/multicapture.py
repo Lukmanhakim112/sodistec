@@ -1,7 +1,10 @@
 import threading
 from multiprocessing import Process, Pool
 
-from cv2 import cv2
+try:
+    from cv2 import cv2
+except ImportError:
+    import cv2
 
 class CaptureThread:
     def __init__(self, input_name) -> None:

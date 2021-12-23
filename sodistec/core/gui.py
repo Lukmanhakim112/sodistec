@@ -7,7 +7,10 @@ from PyQt5.QtWidgets import (
 
 import numpy as np
 
-from cv2 import cv2
+try:
+    from cv2 import cv2
+except ImportError:
+    import cv2
 
 from sodistec.apps import config
 from sodistec.core.detection import DetectPerson
