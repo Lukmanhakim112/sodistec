@@ -1,8 +1,8 @@
 from sodistec.contrib.yolo import yolo
 
 # Load COCO class label
-LABEL_PATH = yolo.YOLO_COCO_PATH
-LABELS = open(LABEL_PATH).read().strip().split("\n")
+with open(yolo.YOLO_COCO_PATH) as f:
+    LABELS = f.read().strip().split("\n")
 
 # YOLO Config
 YOLO_WEIGHT_PATH = yolo.YOLO_WEIGHT_PATH
@@ -30,7 +30,8 @@ THERESHOLD = 15
 USE_THREADING = True
 
 # Set IP Camera url
-CAMERA_URL = None
+# set 0 for using a webcam
+CAMERA_URL = 0
 
 # Email setting
 EMAIL_ALERT = False
