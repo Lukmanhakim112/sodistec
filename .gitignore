@@ -16,6 +16,7 @@ videos/
 sodistec/contrib/yolo/yolov3.cfg
 sodistec/contrib/yolo/yolov3.weights
 sodistec/contrib/caffe/*
+Output/*
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

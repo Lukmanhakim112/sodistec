@@ -1,5 +1,4 @@
 from sodistec.contrib.yolo import yolo
-from sodistec.contrib.caffe import caffe
 
 # Load COCO class label
 LABEL_PATH = yolo.YOLO_COCO_PATH
@@ -8,10 +7,6 @@ LABELS = open(LABEL_PATH).read().strip().split("\n")
 # YOLO Config
 YOLO_WEIGHT_PATH = yolo.YOLO_WEIGHT_PATH
 YOLO_CONFIG_PATH = yolo.YOLO_CONFIG_PATH
-
-# Caffe Config
-CAFFE_WEIGHT_PATH = caffe.CAFFE_WEIGHT_PATH
-CAFFE_PROTEXT_PATH = caffe.CAFFE_PROTEXT_PATH
 
 # Define MAX and MIN (in pixels) distance beetwen 2 people
 MIN_DISTANCE = 50
