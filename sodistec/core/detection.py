@@ -26,7 +26,7 @@ class DetectPerson(QThread):
                  use_gpu: bool = config.USE_GPU,
                  use_threading: bool = config.USE_THREADING,
                  parent = None
-                 ) -> None:
+                ) -> None:
         super(DetectPerson, self).__init__(parent)
 
         self.detect = detect
@@ -138,7 +138,7 @@ class DetectPerson(QThread):
 
             # resize the frame and then detect people (and only people) in it
             #  frame = imutils.resize(frame, width=640)
-            frame  = cv2.resize(frame, (640, 480), cv2.INTER_LINEAR)
+            frame  = cv2.resize(frame, (960, 540), cv2.INTER_LINEAR)
             results = self._detect_people(frame, person_index=config.LABELS.index("person"))
 
             # initialize the set of indexes that violate the max/min social distance limits

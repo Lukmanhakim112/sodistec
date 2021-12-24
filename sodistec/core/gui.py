@@ -1,16 +1,16 @@
-from PyQt5.QtGui import QFont, QImage, QPixmap
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import (
-    QGridLayout, QLabel, QLineEdit,
-    QPushButton, QWidget
-)
-
 import numpy as np
 
 try:
     from cv2 import cv2
 except ImportError:
     import cv2
+
+from PyQt5.QtGui import QFont, QImage, QPixmap
+from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtWidgets import (
+    QGridLayout, QLabel, QLineEdit,
+    QPushButton, QWidget
+)
 
 from sodistec.apps import config
 from sodistec.core.detection import DetectPerson
@@ -27,14 +27,11 @@ class WindowApp(QWidget):
         self.grid = QGridLayout(self)
         self.grid.setRowMinimumHeight(0, self.WIDGET_HEIGHT)
 
-        self._set_font()
-        self._init_ui()
-
-    def _set_font(self):
         font = QFont()
-        font.setPointSize(12)
-
+        font.setPointSize(11)
         self.qfont = font
+
+        self._init_ui()
 
     def _add_to_grid(self,widget: QWidget, row: int, column: int, row_span: int = 1, col_span: int = 1) -> None:
         # add widget to desired location 
@@ -58,14 +55,22 @@ class WindowApp(QWidget):
         self.opencv_box.setAlignment(Qt.AlignCenter)
         
         b_min_distance = QPushButton("Simpan jarak minimal", self)
-        self._add_to_grid(QLabel("Jarak minimal: ", self), 0, 0)
+        b_min_distance.setFont(self.qfont)
+        label_max_distance = QLabel("Jarak minimal: ", self) 
+        label_max_distance.setFont(self.qfont)
+        self._add_to_grid(label_max_distance, 0, 0)
         self.min_distance_textbox = QLineEdit(str(config.MIN_DISTANCE))
+        self.min_distance_textbox.setFont(self.qfont)
         self._add_to_grid(self.min_distance_textbox, 0, 1)
         self._add_to_grid(b_min_distance, 0, 2)
 
         b_max_distance = QPushButton("Simpan jarak maksimal", self)
-        self._add_to_grid(QLabel("Jarak maksimal: ", self), 1, 0)
+        b_max_distance.setFont(self.qfont)
+        label_min_distance = QLabel("Jarak maksimal: ", self)
+        label_min_distance.setFont(self.qfont)
+        self._add_to_grid(label_min_distance, 1, 0)
         self.max_distance_textbox = QLineEdit(str(config.MAX_DISTANCE))
+        self.max_distance_textbox.setFont(self.qfont)
         self._add_to_grid(self.max_distance_textbox, 1, 1)
         self._add_to_grid(b_max_distance, 1, 2)
 
