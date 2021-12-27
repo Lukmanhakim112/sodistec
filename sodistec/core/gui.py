@@ -38,10 +38,10 @@ class WindowApp(QWidget):
         self.grid.addWidget(widget, row, column, row_span, col_span)
 
     def _set_min_distance(self, value: int) -> None:
-        config.MIN_DISTANCE = value
+        config.MAX_DISTANCE = value
 
     def _set_max_distance(self, value: int) -> None:
-        config.MAX_DISTANCE = value
+        config.MIN_DISTANCE = value
 
     def _set_textbox(self) -> None:
         self.textbox = QLineEdit(self)
@@ -54,22 +54,22 @@ class WindowApp(QWidget):
         self.opencv_box.resize(1280, 720)
         self.opencv_box.setAlignment(Qt.AlignCenter)
         
-        b_min_distance = QPushButton("Simpan jarak minimal", self)
+        b_min_distance = QPushButton("Simpan jarak maksimal", self)
         b_min_distance.setFont(self.qfont)
-        label_max_distance = QLabel("Jarak minimal: ", self) 
+        label_max_distance = QLabel("Jarak Maksimal: ", self) 
         label_max_distance.setFont(self.qfont)
         self._add_to_grid(label_max_distance, 0, 0)
-        self.min_distance_textbox = QLineEdit(str(config.MIN_DISTANCE))
+        self.min_distance_textbox = QLineEdit(str(config.MAX_DISTANCE))
         self.min_distance_textbox.setFont(self.qfont)
         self._add_to_grid(self.min_distance_textbox, 0, 1)
         self._add_to_grid(b_min_distance, 0, 2)
 
-        b_max_distance = QPushButton("Simpan jarak maksimal", self)
+        b_max_distance = QPushButton("Simpan jarak minimal", self)
         b_max_distance.setFont(self.qfont)
-        label_min_distance = QLabel("Jarak maksimal: ", self)
+        label_min_distance = QLabel("Jarak Minimal: ", self)
         label_min_distance.setFont(self.qfont)
         self._add_to_grid(label_min_distance, 1, 0)
-        self.max_distance_textbox = QLineEdit(str(config.MAX_DISTANCE))
+        self.max_distance_textbox = QLineEdit(str(config.MIN_DISTANCE))
         self.max_distance_textbox.setFont(self.qfont)
         self._add_to_grid(self.max_distance_textbox, 1, 1)
         self._add_to_grid(b_max_distance, 1, 2)
@@ -95,7 +95,7 @@ class WindowApp(QWidget):
         b_min_distance.clicked.connect(self._min_distance)
         b_max_distance.clicked.connect(self._max_distance)
 
-        self.video_input = DetectPerson(0)
+        self.video_input = DetectPerson(config.CAMERA_URL)
         # connect image from opencv to qt
         self.video_input.change_pixmap_signal.connect(self.update_image)
 
