@@ -2,6 +2,9 @@ from threading import Thread
 import time
 
 import numpy as np
+
+import imutils
+
 from playsound import playsound
 
 try:
@@ -101,6 +104,7 @@ class DetectPerson(QThread):
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
 
+
                     # update our list of bounding box coordinates,
                     # centroids, and confidences
                     boxes.append([x, y, int(width), int(height)])
@@ -123,12 +127,35 @@ class DetectPerson(QThread):
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
 
+                #  roi = frame[y:y+h, x:x+w]
+                marker = self._find_marker(frame)
+                focal_length = (marker[1][0] * 24.0 / 11.0)
+                inches = self._distance_to_camera(11.0, focal_length, marker[1][0])
+                #  inches = 0
+
                 # update our results list to consist of the person
                 # prediction probability, bounding box coordinates,
                 # and the centroid
-                results.append((confidences[i], (x, y, x + w, y + h), centroids[i]))
+                results.append((confidences[i], (x, y, x + w, y + h), centroids[i], inches))
 
         return results
+
+    def _find_marker(self, image):
+        # convert the image to grayscale, blur it, and detect edges
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        edged = cv2.Canny(gray, 35, 125)
+        # find the contours in the edged image and keep the largest one;
+        # we'll assume that this is our piece of paper in the image
+        cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+        c = max(cnts, key = cv2.contourArea)
+        # compute the bounding box of the of the paper region and return it
+        return cv2.minAreaRect(c)
+
+    def _distance_to_camera(self, knownWidth, focalLength, perWidth):
+        # compute and return the distance from the maker to the camera
+        return (knownWidth * focalLength) / perWidth
 
     def run(self) -> None:
         while True:
@@ -157,6 +184,8 @@ class DetectPerson(QThread):
                 # extract all centroids from the results and compute the
                 # Euclidean distances between all pairs of the centroids
                 centroids = np.array([r[2] for r in results])
+                distances = np.array([r[3] for r in results])
+
                 data = dist.cdist(centroids, centroids, metric="euclidean")
 
                 # loop over the upper triangular of the distance matrix
@@ -164,7 +193,7 @@ class DetectPerson(QThread):
                     for j in range(i + 1, data.shape[1]):
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        if data[i, j] < config.MIN_DISTANCE:
+                        if data[i, j] < config.MIN_DISTANCE and distances[0] > 25:
                             serious.add(i)
                             serious.add(j)
                         elif (data[i, j] < config.MAX_DISTANCE):
@@ -173,7 +202,7 @@ class DetectPerson(QThread):
                             abnormal.add(j)
 
             # loop over the results 
-            for (i, (_, bbox, centroid)) in enumerate(results):
+            for (i, (_, bbox, centroid, distance)) in enumerate(results):
                 # extract the bounding box and centroid coordinates, then
                 # initialize the color of the annotation
                 (startX, startY, endX, endY) = bbox
