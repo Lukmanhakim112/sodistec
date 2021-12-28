@@ -1,6 +1,8 @@
+from threading import Thread
 import time
 
 import numpy as np
+from playsound import playsound
 
 try:
     from cv2 import cv2
@@ -37,6 +39,7 @@ class DetectPerson(QThread):
         layer = self.model.getLayerNames()
         self.layer = [layer[i - 1] for i in self.model.getUnconnectedOutLayers()]
 
+
         if use_gpu:
             self._use_gpu()
 
@@ -53,6 +56,9 @@ class DetectPerson(QThread):
         print("[INFO] Searching for compatible NVIDIA GPU...")
         self.model.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         self.model.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+
+    def _play_buzzer(self) -> None:
+        playsound("./sodistec/core/buzzer.wav")
 
     def _detect_people(self, frame, person_index: int = 0) -> list:
         # grab the dimensions of the frame and  initialize the list of
@@ -162,6 +168,7 @@ class DetectPerson(QThread):
                             serious.add(i)
                             serious.add(j)
                         elif (data[i, j] < config.MAX_DISTANCE):
+                            Thread(target=self._play_buzzer).start() # PLAY SOUND!!
                             abnormal.add(i)
                             abnormal.add(j)
 
