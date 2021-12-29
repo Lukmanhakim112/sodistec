@@ -9,12 +9,12 @@ YOLO_WEIGHT_PATH = yolo.YOLO_WEIGHT_PATH
 YOLO_CONFIG_PATH = yolo.YOLO_CONFIG_PATH
 
 # Define MAX and MIN (in pixels) distance beetwen 2 people
-MIN_DISTANCE = 50
-MAX_DISTANCE = 80
+MIN_DISTANCE = 120
+MAX_DISTANCE = 160
 
 # Define minimum probability to filter weak detection
 # with the threashold when applying non-maxima suppression
-MIN_CONF = 0.2
+MIN_CONF = 0.25
 NMS_THRESH = 0.3
 
 # Use GPU for the computations
@@ -32,7 +32,3 @@ USE_THREADING = True
 # Set IP Camera url
 # set 0 for using a webcam
 CAMERA_URL = 0
-
-# Email setting
-EMAIL_ALERT = False
-EMAIL_ADDRESS = None

@@ -27,6 +27,10 @@ class DetectPerson(QThread):
     total_people_signal = pyqtSignal(int)
     safe_distance_signal = pyqtSignal(int)
 
+    KNOW_DISTANCE = 24.0
+    KNOW_HEIGHT = 9.5 
+    KNOW_WIDTH = 11.0
+
     def __init__(self, video_input, detect: str = "person", 
                  use_gpu: bool = config.USE_GPU,
                  use_threading: bool = config.USE_THREADING,
@@ -82,6 +86,7 @@ class DetectPerson(QThread):
         boxes = []
         centroids = []
         confidences = []
+        distances = []
 
         for output in layerOutputs:
             for detection in output:
@@ -104,12 +109,15 @@ class DetectPerson(QThread):
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
 
+                    focal_width = (width * self.KNOW_DISTANCE) / self.KNOW_WIDTH
+                    distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_width, height)
 
                     # update our list of bounding box coordinates,
                     # centroids, and confidences
                     boxes.append([x, y, int(width), int(height)])
                     centroids.append((centerX, centerY))
                     confidences.append(float(confidence))
+                    distances.append(distance)
 
         # apply non-maxima suppression to suppress weak, overlapping
         # bounding boxes
@@ -127,35 +135,16 @@ class DetectPerson(QThread):
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
 
-                #  roi = frame[y:y+h, x:x+w]
-                marker = self._find_marker(frame)
-                focal_length = (marker[1][0] * 24.0 / 11.0)
-                inches = self._distance_to_camera(11.0, focal_length, marker[1][0])
-                #  inches = 0
-
                 # update our results list to consist of the person
                 # prediction probability, bounding box coordinates,
                 # and the centroid
-                results.append((confidences[i], (x, y, x + w, y + h), centroids[i], inches))
+                results.append((confidences[i], (x, y, x + w, y + h), centroids[i], distances[i]))
 
         return results
 
-    def _find_marker(self, image):
-        # convert the image to grayscale, blur it, and detect edges
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5, 5), 0)
-        edged = cv2.Canny(gray, 35, 125)
-        # find the contours in the edged image and keep the largest one;
-        # we'll assume that this is our piece of paper in the image
-        cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
-        c = max(cnts, key = cv2.contourArea)
-        # compute the bounding box of the of the paper region and return it
-        return cv2.minAreaRect(c)
-
-    def _distance_to_camera(self, knownWidth, focalLength, perWidth):
+    def _distance_to_camera(self, know_width, focal_length, perWidth):
         # compute and return the distance from the maker to the camera
-        return (knownWidth * focalLength) / perWidth
+        return (know_width * focal_length) / perWidth
 
     def run(self) -> None:
         while True:
@@ -191,9 +180,14 @@ class DetectPerson(QThread):
                 # loop over the upper triangular of the distance matrix
                 for i in range(0, data.shape[0]):
                     for j in range(i + 1, data.shape[1]):
+                        jarak = dist.euclidean(distances[i], distances[j])
+
+                        print(jarak)
+                        print(data[i, j])
+                        print("===")
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        if data[i, j] < config.MIN_DISTANCE and distances[0] > 25:
+                        if data[i, j] < config.MIN_DISTANCE and jarak < 25:
                             serious.add(i)
                             serious.add(j)
                         elif (data[i, j] < config.MAX_DISTANCE):
