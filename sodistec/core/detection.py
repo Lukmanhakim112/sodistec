@@ -22,7 +22,7 @@ from sodistec.contrib.multicapture import CaptureThread
 
 class DetectPerson(QThread):
     change_pixmap_signal = pyqtSignal(np.ndarray)
-    total_violations_signal = pyqtSignal(int)
+    #  total_violations_signal = pyqtSignal(int)
     total_serious_violations_signal = pyqtSignal(int)
     total_people_signal = pyqtSignal(int)
     safe_distance_signal = pyqtSignal(int)
@@ -122,10 +122,9 @@ class DetectPerson(QThread):
         # apply non-maxima suppression to suppress weak, overlapping
         # bounding boxes
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, config.MIN_CONF, config.NMS_THRESH)
+
+        # Emit signal to the Qt (GUI)
         self.total_people_signal.emit(len(idxs))
-        #  if config.SHOW_PEOPLE_COUNTER:
-        #      human_count = "Total Orang: {}".format(len(idxs))
-        #      cv2.putText(frame, human_count, (470, frame.shape[0] - 75), cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 0), 2)
 
         # ensure at least one detection exists
         if len(idxs) > 0:
@@ -165,7 +164,7 @@ class DetectPerson(QThread):
 
             # initialize the set of indexes that violate the max/min social distance limits
             serious = set()
-            abnormal = set()
+            #  abnormal = set()
 
             # ensure there are *at least* two people detections (required in
             # order to compute our pairwise distance maps)
@@ -188,12 +187,9 @@ class DetectPerson(QThread):
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
                         if data[i, j] < config.MIN_DISTANCE and jarak < 25:
+                            Thread(target=self._play_buzzer).start() # PLAY SOUND!!
                             serious.add(i)
                             serious.add(j)
-                        elif (data[i, j] < config.MAX_DISTANCE):
-                            Thread(target=self._play_buzzer).start() # PLAY SOUND!!
-                            abnormal.add(i)
-                            abnormal.add(j)
 
             # loop over the results 
             for (i, (_, bbox, centroid, distance)) in enumerate(results):
@@ -206,23 +202,13 @@ class DetectPerson(QThread):
                 # if the index pair exists within the violation/abnormal sets, then update the color
                 if i in serious:
                     color = (0, 0, 255)
-                elif i in abnormal:
-                    color = (0, 255, 255) #orange = (0, 165, 255)
+                #  elif i in abnormal:
+                #      color = (0, 255, 255) #orange = (0, 165, 255)
 
                 # draw (1) a bounding box around the person and (2) the
                 # centroid coordinates of the person,
                 cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
                 cv2.circle(frame, (cX, cY), 5, color, 2)
-
-            #  # draw some of the parameters
-            #  Safe_Distance = "Jarak aman: > {}px".format(config.MAX_DISTANCE)
-            #  cv2.putText(frame, Safe_Distance, (470, frame.shape[0] - 25),
-            #      cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
-            #  self.safe_distance_signal.emit(config.MAX_DISTANCE)
-
-            #  Threshold = "Maksimal pelanggaran: {}".format(config.THERESHOLD)
-            #  cv2.putText(frame, Threshold, (470, frame.shape[0] - 50),
-            #      cv2.FONT_HERSHEY_SIMPLEX, 0.60, (255, 0, 0), 2)
 
             #  # draw the total number of social distancing violations on the output frame
             #  text = "Total pelanggaran serius: {}".format(len(serious))
@@ -233,7 +219,7 @@ class DetectPerson(QThread):
             #  text1 = "Total pelanggaran: {}".format(len(abnormal))
             #  cv2.putText(frame, text1, (10, frame.shape[0] - 25),
             #      cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 255, 255), 2)
-            self.total_violations_signal.emit(len(abnormal))
+            #  self.total_violations_signal.emit(len(abnormal))
 
             #  cv2.imshow("Testing", frame)
             self.change_pixmap_signal.emit(frame)

@@ -54,45 +54,45 @@ class WindowApp(QWidget):
         self.opencv_box.resize(1280, 720)
         self.opencv_box.setAlignment(Qt.AlignCenter)
         
-        b_min_distance = QPushButton("Simpan jarak maksimal", self)
-        b_min_distance.setFont(self.qfont)
-        label_max_distance = QLabel("Jarak Maksimal: ", self) 
-        label_max_distance.setFont(self.qfont)
-        self._add_to_grid(label_max_distance, 0, 0)
-        self.min_distance_textbox = QLineEdit(str(config.MAX_DISTANCE))
-        self.min_distance_textbox.setFont(self.qfont)
-        self._add_to_grid(self.min_distance_textbox, 0, 1)
-        self._add_to_grid(b_min_distance, 0, 2)
+        #  b_min_distance = QPushButton("Simpan jarak maksimal", self)
+        #  b_min_distance.setFont(self.qfont)
+        #  label_max_distance = QLabel("Jarak Maksimal: ", self)
+        #  label_max_distance.setFont(self.qfont)
+        #  self._add_to_grid(label_max_distance, 0, 0)
+        #  self.min_distance_textbox = QLineEdit(str(config.MAX_DISTANCE))
+        #  self.min_distance_textbox.setFont(self.qfont)
+        #  self._add_to_grid(self.min_distance_textbox, 0, 1)
+        #  self._add_to_grid(b_min_distance, 0, 2)
 
         b_max_distance = QPushButton("Simpan jarak minimal", self)
         b_max_distance.setFont(self.qfont)
         label_min_distance = QLabel("Jarak Minimal: ", self)
         label_min_distance.setFont(self.qfont)
-        self._add_to_grid(label_min_distance, 1, 0)
+        self._add_to_grid(label_min_distance, 0, 0)
         self.max_distance_textbox = QLineEdit(str(config.MIN_DISTANCE))
         self.max_distance_textbox.setFont(self.qfont)
-        self._add_to_grid(self.max_distance_textbox, 1, 1)
-        self._add_to_grid(b_max_distance, 1, 2)
+        self._add_to_grid(self.max_distance_textbox, 0, 1)
+        self._add_to_grid(b_max_distance, 0, 2)
 
-        self._add_to_grid(self.opencv_box, 2, 0, 1, 3)
+        self._add_to_grid(self.opencv_box, 1, 0, 1, 3)
 
         self.total_violations = QLabel("Total Pelanggaran: 10")
         self.total_violations.setFont(self.qfont)
-        self._add_to_grid(self.total_violations, 3, 0)
+        self._add_to_grid(self.total_violations, 2, 0)
 
         self.serious_violations = QLabel("Total Pelanggaran Serius: 10")
         self.serious_violations.setFont(self.qfont)
-        self._add_to_grid(self.serious_violations, 4, 0)
+        self._add_to_grid(self.serious_violations, 3, 0)
 
         self.total_people = QLabel("Total Orang: 10")
         self.total_people.setFont(self.qfont)
-        self._add_to_grid(self.total_people, 3, 1)
+        self._add_to_grid(self.total_people, 2, 1)
         
-        self.maximum_distance = QLabel(f'Jarak Maksimal: {config.MAX_DISTANCE}')
+        self.maximum_distance = QLabel(f'Jarak Minimal: {config.MIN_DISTANCE}')
         self.maximum_distance.setFont(self.qfont)
-        self._add_to_grid(self.maximum_distance, 4, 1)
+        self._add_to_grid(self.maximum_distance, 3, 1)
 
-        b_min_distance.clicked.connect(self._min_distance)
+        #  b_min_distance.clicked.connect(self._min_distance)
         b_max_distance.clicked.connect(self._max_distance)
 
         self.video_input = DetectPerson(config.CAMERA_URL)
@@ -100,7 +100,7 @@ class WindowApp(QWidget):
         self.video_input.change_pixmap_signal.connect(self.update_image)
 
         # some parameters from openct, passed to qt
-        self.video_input.total_violations_signal.connect(self._update_total_violations)
+        #  self.video_input.total_violations_signal.connect(self._update_total_violations)
         self.video_input.total_people_signal.connect(self._update_total_person)
         self.video_input.total_serious_violations_signal.connect(self._update_total_serious_violations)
 
