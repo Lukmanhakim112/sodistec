@@ -76,21 +76,17 @@ class WindowApp(QWidget):
 
         self._add_to_grid(self.opencv_box, 1, 0, 1, 3)
 
-        self.total_violations = QLabel("Total Pelanggaran: 10")
-        self.total_violations.setFont(self.qfont)
-        self._add_to_grid(self.total_violations, 2, 0)
-
-        self.serious_violations = QLabel("Total Pelanggaran Serius: 10")
+        self.serious_violations = QLabel("Total Pelanggaran: 0")
         self.serious_violations.setFont(self.qfont)
         self._add_to_grid(self.serious_violations, 3, 0)
 
         self.total_people = QLabel("Total Orang: 10")
         self.total_people.setFont(self.qfont)
-        self._add_to_grid(self.total_people, 2, 1)
+        self._add_to_grid(self.total_people, 2, 0)
         
         self.maximum_distance = QLabel(f'Jarak Minimal: {config.MIN_DISTANCE}')
         self.maximum_distance.setFont(self.qfont)
-        self._add_to_grid(self.maximum_distance, 3, 1)
+        self._add_to_grid(self.maximum_distance, 2, 1)
 
         #  b_min_distance.clicked.connect(self._min_distance)
         b_max_distance.clicked.connect(self._max_distance)
@@ -120,12 +116,8 @@ class WindowApp(QWidget):
         self.total_people.setText(f'Total Orang: {total_people}')
 
     @pyqtSlot(int)
-    def _update_total_violations(self, total_violations) -> None:
-        self.total_violations.setText(f'Total Pelanggaran: {total_violations}')
-
-    @pyqtSlot(int)
     def _update_total_serious_violations(self, total_serious_violations) -> None:
-        self.serious_violations.setText(f'Total Pelanggaran Serius: {total_serious_violations}')
+        self.serious_violations.setText(f'Total Pelanggaran: {total_serious_violations}')
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img) -> None:
