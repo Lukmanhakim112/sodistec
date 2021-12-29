@@ -113,7 +113,7 @@ class WindowApp(QWidget):
     @pyqtSlot()
     def _max_distance(self) -> None:
         self._set_max_distance(int(self.max_distance_textbox.text()))
-        self.maximum_distance.setText(f'Jarak Maksimal: {self.max_distance_textbox.text()}')
+        self.maximum_distance.setText(f'Jarak Minimal: {self.max_distance_textbox.text()}')
 
     @pyqtSlot(int)
     def _update_total_person(self, total_people) -> None:
