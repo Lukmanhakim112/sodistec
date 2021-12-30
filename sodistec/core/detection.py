@@ -110,7 +110,7 @@ class DetectPerson(QThread):
                     y = int(centerY - (height / 2))
 
                     focal_height = (height * self.KNOW_DISTANCE) / self.KNOW_HEIGHT
-                    distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_height, height)
+                    distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_height, width)
 
                     print(distance)
 
