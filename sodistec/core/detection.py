@@ -109,17 +109,17 @@ class DetectPerson(QThread):
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
 
-                    focal_height = (height * self.KNOW_DISTANCE) / self.KNOW_HEIGHT
-                    distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_height, width)
+                    focal_height = (x * self.KNOW_DISTANCE) / self.KNOW_HEIGHT
+                    #  distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_height, y)
 
-                    print(distance)
+                    print(y)
 
                     # update our list of bounding box coordinates,
                     # centroids, and confidences
                     boxes.append([x, y, int(width), int(height)])
                     centroids.append((centerX, centerY))
                     confidences.append(float(confidence))
-                    distances.append(distance)
+                    distances.append(y)
 
         # apply non-maxima suppression to suppress weak, overlapping
         # bounding boxes
@@ -188,7 +188,7 @@ class DetectPerson(QThread):
                         print("===")
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        if data[i, j] < config.MIN_DISTANCE and jarak < 25:
+                        if data[i, j] < config.MIN_DISTANCE and jarak < config.MIN_DISTANCE_X:
                             Thread(target=self._play_buzzer).start() # PLAY SOUND!!
                             serious.add(i)
                             serious.add(j)
@@ -212,16 +212,7 @@ class DetectPerson(QThread):
                 cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
                 cv2.circle(frame, (cX, cY), 5, color, 2)
 
-            #  # draw the total number of social distancing violations on the output frame
-            #  text = "Total pelanggaran serius: {}".format(len(serious))
-            #  cv2.putText(frame, text, (10, frame.shape[0] - 55),
-            #      cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 0, 255), 2)
             self.total_serious_violations_signal.emit(len(serious))
-
-            #  text1 = "Total pelanggaran: {}".format(len(abnormal))
-            #  cv2.putText(frame, text1, (10, frame.shape[0] - 25),
-            #      cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 255, 255), 2)
-            #  self.total_violations_signal.emit(len(abnormal))
 
             #  cv2.imshow("Testing", frame)
             self.change_pixmap_signal.emit(frame)

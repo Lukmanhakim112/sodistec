@@ -10,7 +10,12 @@ YOLO_CONFIG_PATH = yolo.YOLO_CONFIG_PATH
 
 # Define MAX and MIN (in pixels) distance beetwen 2 people
 MIN_DISTANCE = 500
-MAX_DISTANCE = 160
+
+# distance beetwen person by it's distance
+# to the camera
+MIN_DISTANCE_X = 5 
+
+# MAX_DISTANCE = 160
 
 # Define minimum probability to filter weak detection
 # with the threashold when applying non-maxima suppression
