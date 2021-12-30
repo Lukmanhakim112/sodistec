@@ -109,8 +109,10 @@ class DetectPerson(QThread):
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
 
-                    focal_width = (width * self.KNOW_DISTANCE) / self.KNOW_WIDTH
-                    distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_width, height)
+                    focal_height = (height * self.KNOW_DISTANCE) / self.KNOW_HEIGHT
+                    distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_height, height)
+
+                    print(distance)
 
                     # update our list of bounding box coordinates,
                     # centroids, and confidences

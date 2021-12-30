@@ -9,7 +9,7 @@ YOLO_WEIGHT_PATH = yolo.YOLO_WEIGHT_PATH
 YOLO_CONFIG_PATH = yolo.YOLO_CONFIG_PATH
 
 # Define MAX and MIN (in pixels) distance beetwen 2 people
-MIN_DISTANCE = 120
+MIN_DISTANCE = 500
 MAX_DISTANCE = 160
 
 # Define minimum probability to filter weak detection
