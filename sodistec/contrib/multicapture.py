@@ -8,7 +8,10 @@ except ImportError:
 
 class CaptureThread:
     def __init__(self, input_name) -> None:
+
         self.capture = cv2.VideoCapture(input_name)
+        self.capture.set(cv2.CAP_PROP_BUFFERSIZE, 3)
+
         (self.grabed, self.frame) = self.capture.read()
 
         self.stopped = False

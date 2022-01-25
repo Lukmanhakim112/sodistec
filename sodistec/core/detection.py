@@ -1,5 +1,6 @@
 from threading import Thread
 import time
+import math
 
 import numpy as np
 
@@ -27,9 +28,9 @@ class DetectPerson(QThread):
     total_people_signal = pyqtSignal(int)
     safe_distance_signal = pyqtSignal(int)
 
-    KNOW_DISTANCE = 24.0
+    KNOW_DISTANCE = 13.0
     KNOW_HEIGHT = 9.5 
-    KNOW_WIDTH = 11.0
+    KNOW_WIDTH = 5.0
 
     def __init__(self, video_input, detect: str = "person", 
                  use_gpu: bool = config.USE_GPU,
@@ -58,6 +59,7 @@ class DetectPerson(QThread):
             self.video_capture = CaptureThread(video_input).start()
         else:
             self.video_capture = cv2.VideoCapture(video_input)
+            self.video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 3)
 
     def _use_gpu(self) -> None:
         print("[INFO] Searching for compatible NVIDIA GPU...")
@@ -109,17 +111,23 @@ class DetectPerson(QThread):
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
 
-                    focal_height = (x * self.KNOW_DISTANCE) / self.KNOW_HEIGHT
-                    #  distance = self._distance_to_camera(self.KNOW_HEIGHT, focal_height, y)
+                    #  print(f'Nilai X: {x}\tNilai Y: {y}', end="\r")
 
-                    print(y)
+                    focal_length = ((width * height) * self.KNOW_DISTANCE) / self.KNOW_WIDTH
+                    distance = (self.KNOW_WIDTH * focal_length) / width
+
+                    #  angel = math.tan(x/y)
+                    #  distance = (height * width) * width * math.sin(angel)
+
+                    #  print(width * height, distance, end="\r")
+                    print(focal_length, distance, end="\r")
 
                     # update our list of bounding box coordinates,
                     # centroids, and confidences
                     boxes.append([x, y, int(width), int(height)])
                     centroids.append((centerX, centerY))
                     confidences.append(float(confidence))
-                    distances.append(y)
+                    distances.append(distance)
 
         # apply non-maxima suppression to suppress weak, overlapping
         # bounding boxes
@@ -142,10 +150,6 @@ class DetectPerson(QThread):
                 results.append((confidences[i], (x, y, x + w, y + h), centroids[i], distances[i]))
 
         return results
-
-    def _distance_to_camera(self, know_width, focal_length, perWidth):
-        # compute and return the distance from the maker to the camera
-        return (know_width * focal_length) / perWidth
 
     def run(self) -> None:
         while True:
@@ -183,12 +187,9 @@ class DetectPerson(QThread):
                     for j in range(i + 1, data.shape[1]):
                         jarak = dist.euclidean(distances[i], distances[j])
 
-                        print(jarak)
-                        print(data[i, j])
-                        print("===")
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        if data[i, j] < config.MIN_DISTANCE and jarak < config.MIN_DISTANCE_X:
+                        if data[i, j] < config.MIN_DISTANCE and jarak < config.MIN_RADIUS:
                             Thread(target=self._play_buzzer).start() # PLAY SOUND!!
                             serious.add(i)
                             serious.add(j)

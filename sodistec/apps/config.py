@@ -13,7 +13,7 @@ MIN_DISTANCE = 500
 
 # distance beetwen person by it's distance
 # to the camera
-MIN_DISTANCE_X = 5 
+MIN_RADIUS = 10 
 
 # MAX_DISTANCE = 160
 
@@ -36,4 +36,4 @@ USE_THREADING = True
 
 # Set IP Camera url
 # set 0 for using a webcam
-CAMERA_URL = 0
+CAMERA_URL = "rtsp://admin:labiot2018@192.168.1.50/live/ch00_3"

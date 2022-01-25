@@ -8,7 +8,7 @@ except ImportError:
 from PyQt5.QtGui import QFont, QImage, QPixmap
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (
-    QGridLayout, QLabel, QLineEdit,
+    QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QWidget
 )
 
@@ -33,9 +33,49 @@ class WindowApp(QWidget):
 
         self._init_ui()
 
-    def _add_to_grid(self,widget: QWidget, row: int, column: int, row_span: int = 1, col_span: int = 1) -> None:
-        # add widget to desired location 
-        self.grid.addWidget(widget, row, column, row_span, col_span)
+    def _setting_group(self):
+        group_box = QGroupBox()
+        layout = QGridLayout()
+
+        distance_label = QLabel("Jarak Minimal: ")
+        distance_input = QLineEdit()
+        distance_sbutt = QPushButton("Simpan Jarak")
+
+        layout.addWidget(distance_label, 0, 0)
+        layout.addWidget(distance_input, 0, 2, 1, 2)
+        layout.addWidget(distance_sbutt, 0, 4)
+
+        group_box.setLayout(layout)
+        group_box.setTitle("Setting")
+
+        return group_box
+
+    def _info_group(self):
+        group_box = QGroupBox()
+        layout = QHBoxLayout()
+
+        self.person_label = QLabel("Total Orang: 0")
+        self.violation_label = QLabel("Total Pelanggaran: 0")
+        min_dist_label = QLabel(f"Jarak Minimal: {config.MIN_DISTANCE}")
+
+        layout.addWidget(self.person_label)
+        layout.addWidget(self.violation_label)
+        layout.addWidget(min_dist_label)
+
+        group_box.setLayout(layout)
+        group_box.setTitle("Informasi")
+
+        return group_box
+
+    def _feed_group(self):
+        group_box = QGroupBox()
+        layout = QGridLayout()
+
+
+        group_box.setLayout(layout)
+        group_box.setTitle("Informasi")
+
+        return group_box
 
     def _set_min_distance(self, value: int) -> None:
         config.MAX_DISTANCE = value
@@ -54,49 +94,16 @@ class WindowApp(QWidget):
         self.opencv_box.resize(1280, 720)
         self.opencv_box.setAlignment(Qt.AlignCenter)
         
-        #  b_min_distance = QPushButton("Simpan jarak maksimal", self)
-        #  b_min_distance.setFont(self.qfont)
-        #  label_max_distance = QLabel("Jarak Maksimal: ", self)
-        #  label_max_distance.setFont(self.qfont)
-        #  self._add_to_grid(label_max_distance, 0, 0)
-        #  self.min_distance_textbox = QLineEdit(str(config.MAX_DISTANCE))
-        #  self.min_distance_textbox.setFont(self.qfont)
-        #  self._add_to_grid(self.min_distance_textbox, 0, 1)
-        #  self._add_to_grid(b_min_distance, 0, 2)
+        self.grid.addWidget(self._setting_group(), 0, 0)
+        self.grid.addWidget(self.opencv_box, 1, 0)
+        self.grid.addWidget(self._info_group(), 2, 0)
 
-        b_max_distance = QPushButton("Simpan jarak minimal", self)
-        b_max_distance.setFont(self.qfont)
-        label_min_distance = QLabel("Jarak Minimal: ", self)
-        label_min_distance.setFont(self.qfont)
-        self._add_to_grid(label_min_distance, 0, 0)
-        self.max_distance_textbox = QLineEdit(str(config.MIN_DISTANCE))
-        self.max_distance_textbox.setFont(self.qfont)
-        self._add_to_grid(self.max_distance_textbox, 0, 1)
-        self._add_to_grid(b_max_distance, 0, 2)
-
-        self._add_to_grid(self.opencv_box, 1, 0, 1, 3)
-
-        self.serious_violations = QLabel("Total Pelanggaran: 0")
-        self.serious_violations.setFont(self.qfont)
-        self._add_to_grid(self.serious_violations, 3, 0)
-
-        self.total_people = QLabel("Total Orang: 10")
-        self.total_people.setFont(self.qfont)
-        self._add_to_grid(self.total_people, 2, 0)
-        
-        self.maximum_distance = QLabel(f'Jarak Minimal: {config.MIN_DISTANCE}')
-        self.maximum_distance.setFont(self.qfont)
-        self._add_to_grid(self.maximum_distance, 2, 1)
-
-        #  b_min_distance.clicked.connect(self._min_distance)
-        b_max_distance.clicked.connect(self._max_distance)
 
         self.video_input = DetectPerson(config.CAMERA_URL)
         # connect image from opencv to qt
         self.video_input.change_pixmap_signal.connect(self.update_image)
 
         # some parameters from openct, passed to qt
-        #  self.video_input.total_violations_signal.connect(self._update_total_violations)
         self.video_input.total_people_signal.connect(self._update_total_person)
         self.video_input.total_serious_violations_signal.connect(self._update_total_serious_violations)
 
@@ -113,11 +120,11 @@ class WindowApp(QWidget):
 
     @pyqtSlot(int)
     def _update_total_person(self, total_people) -> None:
-        self.total_people.setText(f'Total Orang: {total_people}')
+        self.person_label.setText(f'Total Orang: {total_people}')
 
     @pyqtSlot(int)
     def _update_total_serious_violations(self, total_serious_violations) -> None:
-        self.serious_violations.setText(f'Total Pelanggaran: {total_serious_violations}')
+        self.violation_label.setText(f'Total Pelanggaran: {total_serious_violations}')
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img) -> None:
