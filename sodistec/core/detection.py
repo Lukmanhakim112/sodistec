@@ -1,10 +1,7 @@
-from threading import Thread
 import time
 import math
 
 import numpy as np
-
-import imutils
 
 from playsound import playsound
 
@@ -47,7 +44,6 @@ class DetectPerson(QThread):
         layer = self.model.getLayerNames()
         self.layer = [layer[i - 1] for i in self.model.getUnconnectedOutLayers()]
 
-
         if use_gpu:
             self._use_gpu()
 
@@ -70,6 +66,7 @@ class DetectPerson(QThread):
         playsound("./sodistec/core/buzzer.wav")
 
     def _detect_people(self, frame, person_index: int = 0) -> list:
+        # Creadit to: https://github.com/saimj7/Social-Distancing-Detection-in-Real-Time
         # grab the dimensions of the frame and  initialize the list of
         # results
         (H, W) = frame.shape[:2]
@@ -113,14 +110,14 @@ class DetectPerson(QThread):
 
                     #  print(f'Nilai X: {x}\tNilai Y: {y}', end="\r")
 
-                    focal_length = ((width * height) * self.KNOW_DISTANCE) / self.KNOW_WIDTH
-                    distance = (self.KNOW_WIDTH * focal_length) / width
+                    #  focal_length = ((width * height) * self.KNOW_DISTANCE) / self.KNOW_WIDTH
+                    #  distance = (self.KNOW_WIDTH * focal_length) / width
 
-                    #  angel = math.tan(x/y)
-                    #  distance = (height * width) * width * math.sin(angel)
+                    angel = math.tan(x/y)
+                    distance = (height * width) * width * math.sin(angel)
 
                     #  print(width * height, distance, end="\r")
-                    print(focal_length, distance, end="\r")
+                    print(angel, distance, end="\r")
 
                     # update our list of bounding box coordinates,
                     # centroids, and confidences
@@ -152,6 +149,7 @@ class DetectPerson(QThread):
         return results
 
     def run(self) -> None:
+        # Creadit to: https://github.com/saimj7/Social-Distancing-Detection-in-Real-Time
         while True:
             # read the next frame from the file
             if config.USE_THREADING:
