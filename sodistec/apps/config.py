@@ -36,4 +36,5 @@ USE_THREADING = True
 
 # Set IP Camera url
 # set 0 for using a webcam
-CAMERA_URL = "rtsp://admin:labiot2018@192.168.1.50/live/ch00_3"
+#  CAMERA_URL = "rtsp://admin:labiot2018@192.168.1.50/live/ch00_3"
+CAMERA_URL = 0

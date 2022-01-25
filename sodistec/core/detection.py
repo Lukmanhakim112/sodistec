@@ -189,8 +189,8 @@ class DetectPerson(QThread):
 
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        if data[i, j] < config.MIN_DISTANCE and jarak < config.MIN_RADIUS:
-                            Thread(target=self._play_buzzer).start() # PLAY SOUND!!
+                        if data[i, j] < config.MIN_DISTANCE:
+                            #  Thread(target=self._play_buzzer).start() # PLAY SOUND!!
                             serious.add(i)
                             serious.add(j)
 

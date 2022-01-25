@@ -38,11 +38,13 @@ class WindowApp(QWidget):
         layout = QGridLayout()
 
         distance_label = QLabel("Jarak Minimal: ")
-        distance_input = QLineEdit()
+        self.distance_input = QLineEdit()
         distance_sbutt = QPushButton("Simpan Jarak")
 
+        distance_sbutt.clicked.connect(self._set_max_distance)
+
         layout.addWidget(distance_label, 0, 0)
-        layout.addWidget(distance_input, 0, 2, 1, 2)
+        layout.addWidget(self.distance_input, 0, 2, 1, 2)
         layout.addWidget(distance_sbutt, 0, 4)
 
         group_box.setLayout(layout)
@@ -56,11 +58,11 @@ class WindowApp(QWidget):
 
         self.person_label = QLabel("Total Orang: 0")
         self.violation_label = QLabel("Total Pelanggaran: 0")
-        min_dist_label = QLabel(f"Jarak Minimal: {config.MIN_DISTANCE}")
+        self.min_dist_label = QLabel(f"Jarak Minimal: {config.MIN_DISTANCE}")
 
         layout.addWidget(self.person_label)
         layout.addWidget(self.violation_label)
-        layout.addWidget(min_dist_label)
+        layout.addWidget(self.min_dist_label)
 
         group_box.setLayout(layout)
         group_box.setTitle("Informasi")
@@ -77,11 +79,10 @@ class WindowApp(QWidget):
 
         return group_box
 
-    def _set_min_distance(self, value: int) -> None:
-        config.MAX_DISTANCE = value
-
-    def _set_max_distance(self, value: int) -> None:
-        config.MIN_DISTANCE = value
+    @pyqtSlot()
+    def _set_max_distance(self) -> None:
+        config.MIN_DISTANCE = int(self.distance_input.text())
+        self.min_dist_label.setText(f"Jarak Minimal: {config.MIN_DISTANCE}")
 
     def _set_textbox(self) -> None:
         self.textbox = QLineEdit(self)
@@ -112,11 +113,6 @@ class WindowApp(QWidget):
     @pyqtSlot()
     def _min_distance(self) -> None:
         self._set_min_distance(int(self.min_distance_textbox.text()))
-
-    @pyqtSlot()
-    def _max_distance(self) -> None:
-        self._set_max_distance(int(self.max_distance_textbox.text()))
-        self.maximum_distance.setText(f'Jarak Minimal: {self.max_distance_textbox.text()}')
 
     @pyqtSlot(int)
     def _update_total_person(self, total_people) -> None:
