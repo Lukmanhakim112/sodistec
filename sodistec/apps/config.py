@@ -1,3 +1,5 @@
+from typing import Union
+
 from sodistec.contrib.yolo import yolo
 
 # Load COCO class label
@@ -9,32 +11,33 @@ YOLO_WEIGHT_PATH = yolo.YOLO_WEIGHT_PATH
 YOLO_CONFIG_PATH = yolo.YOLO_CONFIG_PATH
 
 # Define MAX and MIN (in pixels) distance beetwen 2 people
-MIN_DISTANCE = 500
+MIN_DISTANCE: int = 500
 
 # distance beetwen person by it's distance
 # to the camera
-MIN_RADIUS = 10 
+MIN_RADIUS: int = 10 
 
 # MAX_DISTANCE = 160
+PLAY_BUZZER: bool = False
 
 # Define minimum probability to filter weak detection
 # with the threashold when applying non-maxima suppression
-MIN_CONF = 0.25
-NMS_THRESH = 0.3
+MIN_CONF: float = 0.25
+NMS_THRESH: float = 0.3
 
 # Use GPU for the computations
-USE_GPU = True
+USE_GPU: bool = True
 
 # Show counter for the people
-SHOW_PEOPLE_COUNTER = True
+SHOW_PEOPLE_COUNTER: bool = True
 
 # Vialotaions limit
-THERESHOLD = 15
+THERESHOLD: int = 15
 
 # Use threading
-USE_THREADING = True
+USE_THREADING: float = True
 
 # Set IP Camera url
 # set 0 for using a webcam
 #  CAMERA_URL = "rtsp://admin:labiot2018@192.168.1.50/live/ch00_3"
-CAMERA_URL = 0
+CAMERA_URL: Union[int, str] = 0

@@ -21,6 +21,9 @@ class CaptureThread:
         t = threading.Thread(target=self._update)
         t.daemon = True
         t.start()
+
+        # Or process?
+        # TODO: try using multiprocessing
         #  p = Pool()
         #  p.imap(self._update, self.frame)
         
