@@ -1,17 +1,16 @@
 import sys
 
-from sodistec.core.detection import DetectPerson
 from sodistec.core.gui import WindowApp
 
 from PyQt5.QtWidgets import QApplication
 
+import qdarktheme
+
 def main(argv):
-    #  p1 = DetectPerson(".\\videos\\test.mp4")
-    #  #  p1 = DetectPerson(1)
-    #  p1.run()
 
     app = QApplication(argv)
     ex = WindowApp()
+    app.setStyleSheet(qdarktheme.load_stylesheet("light"))
     ex.show()
 
     sys.exit(app.exec())

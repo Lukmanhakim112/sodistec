@@ -35,9 +35,9 @@ SHOW_PEOPLE_COUNTER: bool = True
 THERESHOLD: int = 15
 
 # Use threading
-USE_THREADING: float = True
+USE_THREADING: bool = True
 
 # Set IP Camera url
 # set 0 for using a webcam
-#  CAMERA_URL = "rtsp://admin:labiot2018@192.168.1.50/live/ch00_3"
-CAMERA_URL: Union[int, str] = 0
+CAMERA_URL: Union[int, str] = "rtsp://cam01:labiot2018@192.168.1.55:5544/11"
+
