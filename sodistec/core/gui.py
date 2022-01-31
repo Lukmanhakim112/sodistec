@@ -37,6 +37,8 @@ class WindowApp(QWidget):
         group_box = QGroupBox()
         layout = QGridLayout()
 
+        font = QFont('Arial', 13)
+
         distance_label = QLabel("Jarak Minimal: ")
         self.distance_input = QLineEdit()
         distance_sbutt = QPushButton("Simpan Jarak")
@@ -49,12 +51,15 @@ class WindowApp(QWidget):
 
         group_box.setLayout(layout)
         group_box.setTitle("Setting")
+        group_box.setFont(font)
 
         return group_box
 
     def _info_group(self):
         group_box = QGroupBox()
         layout = QHBoxLayout()
+
+        font = QFont('Arial', 13)
 
         self.person_label = QLabel("Total Orang: 0")
         self.violation_label = QLabel("Total Pelanggaran: 0")
@@ -66,6 +71,7 @@ class WindowApp(QWidget):
 
         group_box.setLayout(layout)
         group_box.setTitle("Informasi")
+        group_box.setFont(font)
 
         return group_box
 
@@ -81,7 +87,15 @@ class WindowApp(QWidget):
 
     @pyqtSlot()
     def _set_max_distance(self) -> None:
-        config.MIN_DISTANCE = int(self.distance_input.text())
+        try:
+            value = int(self.distance_input.text())
+        except Exception:
+            value = -1
+
+        if value < 0:
+            return
+
+        config.MIN_DISTANCE = value
         self.min_dist_label.setText(f"Jarak Minimal: {config.MIN_DISTANCE}")
 
     def _set_textbox(self) -> None:
