@@ -113,7 +113,6 @@ class WindowApp(QWidget):
         self.grid.addWidget(self.opencv_box, 1, 0)
         self.grid.addWidget(self._info_group(), 2, 0)
 
-
         self.video_input = DetectPerson(config.CAMERA_URL)
         # connect image from opencv to qt
         self.video_input.change_pixmap_signal.connect(self.update_image)

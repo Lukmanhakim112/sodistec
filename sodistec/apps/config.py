@@ -10,12 +10,12 @@ with open(yolo.YOLO_COCO_PATH) as f:
 YOLO_WEIGHT_PATH = yolo.YOLO_WEIGHT_PATH
 YOLO_CONFIG_PATH = yolo.YOLO_CONFIG_PATH
 
-# Define MAX and MIN (in pixels) distance beetwen 2 people
-MIN_DISTANCE: int = 500
+# Define MIN (in pixels) distance beetwen 2 people
+MIN_DISTANCE: int = 300
 
 # distance beetwen person by it's distance
 # to the camera
-MIN_RADIUS: int = 10 
+MIN_RADIUS: int = 35 # 20 
 
 # MAX_DISTANCE = 160
 PLAY_BUZZER: bool = False
