@@ -62,7 +62,7 @@ class WindowApp(QWidget):
         font = QFont('Arial', 13)
 
         self.person_label = QLabel("Total Orang: 0")
-        self.violation_label = QLabel("Total Pelanggaran: 0")
+        self.violation_label = QLabel("Total Pelanggar: 0")
         self.min_dist_label = QLabel(f"Jarak Minimal: {config.MIN_DISTANCE}")
 
         layout.addWidget(self.person_label)
@@ -134,7 +134,7 @@ class WindowApp(QWidget):
 
     @pyqtSlot(int)
     def _update_total_serious_violations(self, total_serious_violations) -> None:
-        self.violation_label.setText(f'Total Pelanggaran: {total_serious_violations}')
+        self.violation_label.setText(f'Total Pelanggar: {total_serious_violations}')
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img) -> None:
