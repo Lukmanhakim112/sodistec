@@ -39,5 +39,5 @@ USE_THREADING: bool = True
 
 # Set IP Camera url
 # set 0 for using a webcam
-CAMERA_URL: Union[int, str] = "rtsp://cam01:labiot2018@192.168.1.55:5544/11"
+CAMERA_URL: Union[int, str] = "rtsp://admin:labiot2018@192.168.1.55/live/ch00_01"
 

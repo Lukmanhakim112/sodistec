@@ -109,23 +109,20 @@ class DetectPerson(QThread):
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
 
-                    #  print(f'Nilai X: {x}\tNilai Y: {y}', end="\r")
+                    focal_length = (width * self.KNOW_DISTANCE) / self.KNOW_WIDTH
 
-                    #  focal_length = ((width * height) * self.KNOW_DISTANCE) / self.KNOW_WIDTH
-                    #  distance = (self.KNOW_WIDTH * focal_length) / width
+                    #  angel = math.tan(x/y)
+                    #  distance = (height * width) * width * math.sin(angel)
 
-                    angel = math.tan(x/y)
-                    distance = (height * width) * width * math.sin(angel)
-
-                    #  print(width * height, distance, end="\r")
-                    print(angel, distance, end="\r")
+                    #  #  print(width * height, distance, end="\r")
+                    #  print(angel, distance, end="\r")
 
                     # update our list of bounding box coordinates,
                     # centroids, and confidences
                     boxes.append([x, y, int(width), int(height)])
                     centroids.append((centerX, centerY))
                     confidences.append(float(confidence))
-                    distances.append(distance)
+                    distances.append(focal_length)
 
         # apply non-maxima suppression to suppress weak, overlapping
         # bounding boxes
@@ -188,7 +185,7 @@ class DetectPerson(QThread):
 
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        if data[i, j] < config.MIN_DISTANCE and jarak < config.MIN_RADIUS:
+                        if data[i, j] < config.MIN_DISTANCE and jarak < config.MIN_RADIUS or data[i, j] < 0:
                             if config.PLAY_BUZZER:
                                 Thread(target=self._play_buzzer).start() # PLAY SOUND!!
                             serious.add(i)
