@@ -79,6 +79,11 @@ class WindowApp(QWidget):
         group_box = QGroupBox()
         layout = QGridLayout()
 
+        self.opencv_box = QLabel(self)
+        self.opencv_box.resize(1280, 720)
+        self.opencv_box.setAlignment(Qt.AlignCenter)
+
+        layout.addWidget(self.opencv_box, 0, 0)
 
         group_box.setLayout(layout)
         group_box.setTitle("Informasi")
@@ -105,12 +110,8 @@ class WindowApp(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(40, 60, 1280, 720)
 
-        self.opencv_box = QLabel(self)
-        self.opencv_box.resize(1280, 720)
-        self.opencv_box.setAlignment(Qt.AlignCenter)
-        
         self.grid.addWidget(self._setting_group(), 0, 0)
-        self.grid.addWidget(self.opencv_box, 1, 0)
+        self.grid.addWidget(self._feed_group(), 1, 0)
         self.grid.addWidget(self._info_group(), 2, 0)
 
         self.video_input = DetectPerson(config.CAMERA_URL)
