@@ -127,6 +127,7 @@ class WindowApp(QWidget):
         self.video_input_2.change_pixmap_signal.connect(self.update_image_2) # connect image from opencv to qt
 
         # some parameters from openct, passed to qt
+        self.total_peo_buffer = []
         self.video_input.total_people_signal.connect(self._update_total_person)
         self.video_input_2.total_people_signal.connect(self._update_total_person)
 
@@ -144,17 +145,20 @@ class WindowApp(QWidget):
 
     @pyqtSlot(int)
     def _update_total_person(self, total_people) -> None:
-        self.person_label.setText(f'Total Orang: {total_people}')
+        self.total_peo_buffer.append(total_people)
+        self.person_label.setText(f'Total Orang: {max(self.total_peo_buffer)}')
+
+        if len(self.total_peo_buffer) > 2:
+            self.total_peo_buffer.pop(0)
 
     @pyqtSlot(int)
     def _update_total_serious_violations(self, total_serious_violations) -> None:
 
-        if total_serious_violations in self.total_vio_buffer:
-            return
-
         self.total_vio_buffer.append(total_serious_violations)
         self.violation_label.setText(f'Total Pelanggar: {max(self.total_vio_buffer)}')
-        self.total_vio_buffer.pop(0)
+
+        if len(self.total_vio_buffer) > 2:
+            self.total_vio_buffer.pop(0)
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img) -> None:

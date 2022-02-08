@@ -67,7 +67,7 @@ class DetectPerson(QThread):
         playsound("./sodistec/core/buzzer.wav")
 
     def _detect_people(self, frame, person_index: int = 0) -> list:
-        # Creadit to: https://github.com/saimj7/Social-Distancing-Detection-in-Real-Time
+        # Credit to: https://github.com/saimj7/Social-Distancing-Detection-in-Real-Time
         # grab the dimensions of the frame and  initialize the list of
         # results
         (H, W) = frame.shape[:2]
@@ -147,7 +147,7 @@ class DetectPerson(QThread):
         return results
 
     def run(self) -> None:
-        # Creadit to: https://github.com/saimj7/Social-Distancing-Detection-in-Real-Time
+        # Credit to: https://github.com/saimj7/Social-Distancing-Detection-in-Real-Time
         while True:
             # read the next frame from the file
             if config.USE_THREADING:
