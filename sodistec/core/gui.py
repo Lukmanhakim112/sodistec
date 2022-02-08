@@ -83,7 +83,12 @@ class WindowApp(QWidget):
         self.opencv_box.resize(1280, 720)
         self.opencv_box.setAlignment(Qt.AlignCenter)
 
+        self.opencv_box_2 = QLabel(self)
+        self.opencv_box_2.resize(1280, 720)
+        self.opencv_box_2.setAlignment(Qt.AlignCenter)
+
         layout.addWidget(self.opencv_box, 0, 0)
+        layout.addWidget(self.opencv_box_2, 0, 1)
 
         group_box.setLayout(layout)
         group_box.setTitle("Informasi")
@@ -95,7 +100,7 @@ class WindowApp(QWidget):
         try:
             value = int(self.distance_input.text())
         except Exception:
-            value = -1
+            return
 
         if value < 0:
             return
@@ -115,14 +120,17 @@ class WindowApp(QWidget):
         self.grid.addWidget(self._info_group(), 2, 0)
 
         self.video_input = DetectPerson(config.CAMERA_URL)
-        # connect image from opencv to qt
-        self.video_input.change_pixmap_signal.connect(self.update_image)
+        self.video_input.change_pixmap_signal.connect(self.update_image) # connect image from opencv to qt
+
+        self.video_input_2 = DetectPerson(config.CAMERA_URL_2)
+        self.video_input_2.change_pixmap_signal.connect(self.update_image_2) # connect image from opencv to qt
 
         # some parameters from openct, passed to qt
         self.video_input.total_people_signal.connect(self._update_total_person)
         self.video_input.total_serious_violations_signal.connect(self._update_total_serious_violations)
 
         self.video_input.start()
+        self.video_input_2.start()
 
     @pyqtSlot()
     def _min_distance(self) -> None:
@@ -140,6 +148,11 @@ class WindowApp(QWidget):
     def update_image(self, cv_img) -> None:
         qt_image = self.convert_cv_qt(cv_img)
         self.opencv_box.setPixmap(qt_image)
+
+    @pyqtSlot(np.ndarray)
+    def update_image_2(self, cv_img) -> None:
+        qt_image = self.convert_cv_qt(cv_img)
+        self.opencv_box_2.setPixmap(qt_image)
 
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""

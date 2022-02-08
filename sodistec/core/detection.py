@@ -109,7 +109,7 @@ class DetectPerson(QThread):
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
 
-                    focal_length = (width * self.KNOW_DISTANCE) / self.KNOW_WIDTH
+                    focal_length = (width * self.KNOW_DISTANCE + x) / self.KNOW_WIDTH
 
                     #  angel = math.tan(x/y)
                     #  distance = (height * width) * width * math.sin(angel)
