@@ -22,7 +22,7 @@ PLAY_BUZZER: bool = False
 
 # Define minimum probability to filter weak detection
 # with the threashold when applying non-maxima suppression
-MIN_CONF: float = 0.25
+MIN_CONF: float = 0.2
 NMS_THRESH: float = 0.3
 
 # Use GPU for the computations

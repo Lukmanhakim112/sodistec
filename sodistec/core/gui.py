@@ -91,7 +91,6 @@ class WindowApp(QWidget):
         layout.addWidget(self.opencv_box_2, 0, 1)
 
         group_box.setLayout(layout)
-        group_box.setTitle("Informasi")
 
         return group_box
 
@@ -119,6 +118,8 @@ class WindowApp(QWidget):
         self.grid.addWidget(self._feed_group(), 1, 0)
         self.grid.addWidget(self._info_group(), 2, 0)
 
+        self.grid.setRowStretch(1, 2)
+
         self.video_input = DetectPerson(config.CAMERA_URL)
         self.video_input.change_pixmap_signal.connect(self.update_image) # connect image from opencv to qt
 
@@ -127,7 +128,12 @@ class WindowApp(QWidget):
 
         # some parameters from openct, passed to qt
         self.video_input.total_people_signal.connect(self._update_total_person)
+        self.video_input_2.total_people_signal.connect(self._update_total_person)
+
+        self.total_vio_buffer = []
         self.video_input.total_serious_violations_signal.connect(self._update_total_serious_violations)
+        self.video_input_2.total_serious_violations_signal.connect(self._update_total_serious_violations)
+        
 
         self.video_input.start()
         self.video_input_2.start()
@@ -142,7 +148,13 @@ class WindowApp(QWidget):
 
     @pyqtSlot(int)
     def _update_total_serious_violations(self, total_serious_violations) -> None:
-        self.violation_label.setText(f'Total Pelanggar: {total_serious_violations}')
+
+        if total_serious_violations in self.total_vio_buffer:
+            return
+
+        self.total_vio_buffer.append(total_serious_violations)
+        self.violation_label.setText(f'Total Pelanggar: {max(self.total_vio_buffer)}')
+        self.total_vio_buffer.pop(0)
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img) -> None:
