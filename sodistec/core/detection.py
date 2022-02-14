@@ -20,20 +20,22 @@ from sodistec.contrib.yolo import yolo
 from sodistec.contrib.multicapture import CaptureThread
 
 class DetectPerson(QThread):
-    change_pixmap_signal = pyqtSignal(np.ndarray)
-    #  total_violations_signal = pyqtSignal(int)
-    total_serious_violations_signal = pyqtSignal(int)
-    total_people_signal = pyqtSignal(int)
+    change_pixmap_signal = pyqtSignal(np.ndarray, int)
+    total_serious_violations_signal = pyqtSignal(int, int)
+    total_people_signal = pyqtSignal(int, int)
     safe_distance_signal = pyqtSignal(int)
 
     KNOW_DISTANCE = 13.0
     KNOW_HEIGHT = 9.5 
     KNOW_WIDTH = 5.0
 
-    def __init__(self, video_input, detect: str = "person", 
+    def __init__(self,
+                 video_input,
+                 camera_id: int,
+                 detect: str = "person", 
                  use_gpu: bool = config.USE_GPU,
                  use_threading: bool = config.USE_THREADING,
-                 parent = None
+                 parent = None,
                 ) -> None:
         super(DetectPerson, self).__init__(parent)
 
@@ -41,6 +43,8 @@ class DetectPerson(QThread):
         self.model = cv2.dnn.readNetFromDarknet(
             yolo.YOLO4_MINI_CONFIG_PATH, yolo.YOLO4_MINI_WEIGHT_PATH
         )
+
+        self.camera_id = camera_id
 
         layer = self.model.getLayerNames()
         self.layer = [layer[i - 1] for i in self.model.getUnconnectedOutLayers()]
@@ -129,7 +133,7 @@ class DetectPerson(QThread):
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, config.MIN_CONF, config.NMS_THRESH)
 
         # Emit signal to the Qt (GUI)
-        self.total_people_signal.emit(len(idxs))
+        self.total_people_signal.emit(len(idxs), self.camera_id)
 
         # ensure at least one detection exists
         if len(idxs) > 0:
@@ -185,9 +189,10 @@ class DetectPerson(QThread):
 
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        print(f'{jarak = :.2f} - {data[i, j] = :.2f}', end='\r')
+                        print(f'{jarak = :.2f} | {data[i, j] = :.2f} | {(data[i, j] + jarak) / 2 = :.2f}', end='\r')
 
-                        if data[i, j] < config.MIN_DISTANCE: #and jarak < config.MIN_RADIUS or data[i, j] < 0:
+                        #  if data[i, j] < config.MIN_DISTANCE: #and jarak < config.MIN_RADIUS or data[i, j] < 0:
+                        if (data[i, j] + jarak) / 2 < config.MIN_DISTANCE: #and jarak < config.MIN_RADIUS or data[i, j] < 0:
 
                             if config.PLAY_BUZZER:
                                 Thread(target=self._play_buzzer).start() # PLAY SOUND!!
@@ -214,8 +219,6 @@ class DetectPerson(QThread):
                 cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
                 cv2.circle(frame, (cX, cY), 5, color, 2)
 
-            self.total_serious_violations_signal.emit(len(serious))
-
-            #  cv2.imshow("Testing", frame)
-            self.change_pixmap_signal.emit(frame)
+            self.total_serious_violations_signal.emit(len(serious), self.camera_id)
+            self.change_pixmap_signal.emit(frame, self.camera_id)
 

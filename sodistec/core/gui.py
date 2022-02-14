@@ -9,7 +9,7 @@ from PyQt5.QtGui import QFont, QImage, QPixmap
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (
     QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QWidget
+    QPushButton, QWidget, QVBoxLayout
 )
 
 from sodistec.apps import config
@@ -24,6 +24,14 @@ class WindowApp(QWidget):
 
         self.title = "Sodistec"
 
+        # Display buffer
+        self.display_feed = {}
+        self.cameras = {}
+
+        # Statistic buffer
+        self.people_counter = {}
+        self.violation_counter = {}
+
         self.grid = QGridLayout(self)
         self.grid.setRowMinimumHeight(0, self.WIDGET_HEIGHT)
 
@@ -32,6 +40,58 @@ class WindowApp(QWidget):
         self.qfont = font
 
         self._init_ui()
+
+    def _add_info(self, index: int):
+        group_box = QGroupBox()
+
+        layout = QHBoxLayout()
+        font = QFont('Arial', 13)
+
+        self.people_counter[index] = QLabel("Total Orang: 0")
+        self.violation_counter[index] = QLabel("Total Pelanggar: 0")
+
+        group_box.setLayout(layout)
+        group_box.setTitle(f"Informasi Camera {index + 1}")
+        group_box.setFont(font)
+
+        layout.addWidget(self.people_counter[index])
+        layout.addWidget(self.violation_counter[index])
+
+        return group_box
+
+    def _add_video_feed(self, index: int):
+        group_box = QGroupBox()
+        layout = QVBoxLayout()
+        font = QFont('Arial', 13)
+
+        self.display_feed[f"display_{index}"] = QLabel(self)
+        self.display_feed[f"display_{index}"].resize(1280, 720)
+        self.display_feed[f"display_{index}"].setAlignment(Qt.AlignCenter)
+
+        group_box.setLayout(layout)
+        group_box.setFont(font)
+        group_box.setTitle(f"Camera {index + 1}")
+
+        layout.addWidget(self.display_feed[f"display_{index}"])
+        layout.addWidget(self._add_info(index))
+        layout.setStretch(0, 1)
+
+        return group_box
+
+    def _feed_group(self):
+        group_box = QGroupBox()
+        layout = QHBoxLayout()
+
+        for index, camera in enumerate(config.CAMERAS_URL):
+            self.cameras[f"camera_{index}"] = DetectPerson(camera, index)
+            self.cameras[f"camera_{index}"].change_pixmap_signal.connect(self._update_image)
+            self.cameras[f"camera_{index}"].total_people_signal.connect(self._update_total_person)
+            self.cameras[f"camera_{index}"].total_serious_violations_signal.connect(self._update_total_serious_violations)
+
+            layout.addWidget(self._add_video_feed(index))
+
+        group_box.setLayout(layout)
+        return group_box
 
     def _setting_group(self):
         group_box = QGroupBox()
@@ -43,54 +103,18 @@ class WindowApp(QWidget):
         self.distance_input = QLineEdit()
         distance_sbutt = QPushButton("Simpan Jarak")
 
+        self.min_dist_label = QLabel(f"Jarak Minimal: {config.MIN_DISTANCE}")
+
         distance_sbutt.clicked.connect(self._set_max_distance)
 
         layout.addWidget(distance_label, 0, 0)
         layout.addWidget(self.distance_input, 0, 2, 1, 2)
         layout.addWidget(distance_sbutt, 0, 4)
+        layout.addWidget(self.min_dist_label, 1, 0, 1, 5)
 
         group_box.setLayout(layout)
         group_box.setTitle("Setting")
         group_box.setFont(font)
-
-        return group_box
-
-    def _info_group(self):
-        group_box = QGroupBox()
-        layout = QHBoxLayout()
-
-        font = QFont('Arial', 13)
-
-        self.person_label = QLabel("Total Orang: 0")
-        self.violation_label = QLabel("Total Pelanggar: 0")
-        self.min_dist_label = QLabel(f"Jarak Minimal: {config.MIN_DISTANCE}")
-
-        layout.addWidget(self.person_label)
-        layout.addWidget(self.violation_label)
-        layout.addWidget(self.min_dist_label)
-
-        group_box.setLayout(layout)
-        group_box.setTitle("Informasi")
-        group_box.setFont(font)
-
-        return group_box
-
-    def _feed_group(self):
-        group_box = QGroupBox()
-        layout = QGridLayout()
-
-        self.opencv_box = QLabel(self)
-        self.opencv_box.resize(1280, 720)
-        self.opencv_box.setAlignment(Qt.AlignCenter)
-
-        self.opencv_box_2 = QLabel(self)
-        self.opencv_box_2.resize(1280, 720)
-        self.opencv_box_2.setAlignment(Qt.AlignCenter)
-
-        layout.addWidget(self.opencv_box, 0, 0)
-        layout.addWidget(self.opencv_box_2, 0, 1)
-
-        group_box.setLayout(layout)
 
         return group_box
 
@@ -116,59 +140,28 @@ class WindowApp(QWidget):
 
         self.grid.addWidget(self._setting_group(), 0, 0)
         self.grid.addWidget(self._feed_group(), 1, 0)
-        self.grid.addWidget(self._info_group(), 2, 0)
 
         self.grid.setRowStretch(1, 2)
 
-        self.video_input = DetectPerson(config.CAMERA_URL)
-        self.video_input.change_pixmap_signal.connect(self.update_image) # connect image from opencv to qt
-
-        self.video_input_2 = DetectPerson(config.CAMERA_URL_2)
-        self.video_input_2.change_pixmap_signal.connect(self.update_image_2) # connect image from opencv to qt
-
-        # some parameters from openct, passed to qt
-        self.total_peo_buffer = []
-        self.video_input.total_people_signal.connect(self._update_total_person)
-        self.video_input_2.total_people_signal.connect(self._update_total_person)
-
-        self.total_vio_buffer = []
-        self.video_input.total_serious_violations_signal.connect(self._update_total_serious_violations)
-        self.video_input_2.total_serious_violations_signal.connect(self._update_total_serious_violations)
-        
-
-        self.video_input.start()
-        self.video_input_2.start()
+        for index, camera in enumerate(config.CAMERAS_URL):
+            self.cameras[f"camera_{index}"].start()
 
     @pyqtSlot()
     def _min_distance(self) -> None:
         self._set_min_distance(int(self.min_distance_textbox.text()))
 
-    @pyqtSlot(int)
-    def _update_total_person(self, total_people) -> None:
-        self.total_peo_buffer.append(total_people)
-        self.person_label.setText(f'Total Orang: {max(self.total_peo_buffer)}')
+    @pyqtSlot(int, int)
+    def _update_total_person(self, total_people, camera_id) -> None:
+        self.people_counter[camera_id].setText(f'Total Orang: {total_people}')
 
-        if len(self.total_peo_buffer) > 2:
-            self.total_peo_buffer.pop(0)
+    @pyqtSlot(int, int)
+    def _update_total_serious_violations(self, total_serious_violations, camera_id) -> None:
+        self.violation_counter[camera_id].setText(f'Total Pelanggar: {total_serious_violations}')
 
-    @pyqtSlot(int)
-    def _update_total_serious_violations(self, total_serious_violations) -> None:
-
-        self.total_vio_buffer.append(total_serious_violations)
-        self.violation_label.setText(f'Total Pelanggar: {max(self.total_vio_buffer)}')
-
-        if len(self.total_vio_buffer) > 2:
-            self.total_vio_buffer.pop(0)
-
-    @pyqtSlot(np.ndarray)
-    def update_image(self, cv_img) -> None:
+    @pyqtSlot(np.ndarray, int)
+    def _update_image(self, cv_img, camera_id) -> None:
         qt_image = self.convert_cv_qt(cv_img)
-        self.opencv_box.setPixmap(qt_image)
-
-    @pyqtSlot(np.ndarray)
-    def update_image_2(self, cv_img) -> None:
-        qt_image = self.convert_cv_qt(cv_img)
-        self.opencv_box_2.setPixmap(qt_image)
+        self.display_feed[f"display_{camera_id}"].setPixmap(qt_image)
 
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""

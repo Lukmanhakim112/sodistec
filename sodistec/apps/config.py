@@ -37,8 +37,18 @@ THERESHOLD: int = 15
 # Use threading
 USE_THREADING: bool = True
 
+# Camera layout
+MAX_ROW: int = 3
+MAX_COL: int = 3
+
 # Set IP Camera url
 # set 0 for using a webcam
 CAMERA_URL: Union[int, str] = "rtsp://admin:labiot2018@192.168.1.55/live/ch00_01"
 CAMERA_URL_2: Union[int, str] = "rtsp://admin:labiot2018@192.168.1.54/live/ch00_01"
+
+CAMERAS_URL = [
+    0,
+    "rtsp://admin:labiot2018@192.168.1.55/live/ch00_01",
+    #  2: "rtsp://admin:labiot2018@192.168.1.54/live/ch00_01",
+]
 
