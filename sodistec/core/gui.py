@@ -1,7 +1,7 @@
 import numpy as np
 
 try:
-    from cv2 import cv2
+    from cv import cv2
 except ImportError:
     import cv2
 
@@ -13,7 +13,10 @@ from PyQt5.QtWidgets import (
 )
 
 from sodistec.apps import config
+from sodistec.contrib.temperature import TemperatureReader 
+from sodistec.contrib.dialog import SetCamera
 from sodistec.core.detection import DetectPerson
+
 
 class WindowApp(QWidget):
 
@@ -23,6 +26,9 @@ class WindowApp(QWidget):
         self.WIDGET_HEIGHT = 25
 
         self.title = "Sodistec"
+
+        set_camera = SetCamera(self)
+        set_camera.exec()
 
         # Display buffer
         self.display_feed = {}
@@ -38,6 +44,13 @@ class WindowApp(QWidget):
         font = QFont()
         font.setPointSize(11)
         self.qfont = font
+
+        try:
+            self.temp_reader = TemperatureReader('COM9', self)
+            self.temp_reader.temperature.connect(self._update_temperature)
+            self.temp_reader.start()
+        except Exception:
+            self.temp_reader = None
 
         self._init_ui()
 
@@ -104,6 +117,7 @@ class WindowApp(QWidget):
         distance_sbutt = QPushButton("Simpan Jarak")
 
         self.min_dist_label = QLabel(f"Jarak Minimal: {config.MIN_DISTANCE}")
+        self.temperature = QLabel(f"Suhu: 0 °C")
 
         distance_sbutt.clicked.connect(self._set_max_distance)
 
@@ -111,6 +125,7 @@ class WindowApp(QWidget):
         layout.addWidget(self.distance_input, 0, 2, 1, 2)
         layout.addWidget(distance_sbutt, 0, 4)
         layout.addWidget(self.min_dist_label, 1, 0, 1, 5)
+        layout.addWidget(self.temperature, 2, 0, 1, 5)
 
         group_box.setLayout(layout)
         group_box.setTitle("Setting")
@@ -136,7 +151,7 @@ class WindowApp(QWidget):
 
     def _init_ui(self) -> None:
         self.setWindowTitle(self.title)
-        self.setGeometry(40, 60, 1280, 720)
+        self.resize(self.screen().size())
 
         self.grid.addWidget(self._setting_group(), 0, 0)
         self.grid.addWidget(self._feed_group(), 1, 0)
@@ -145,6 +160,10 @@ class WindowApp(QWidget):
 
         for index, camera in enumerate(config.CAMERAS_URL):
             self.cameras[f"camera_{index}"].start()
+
+    @pyqtSlot(str)
+    def _update_temperature(self, temp) -> None:
+        self.temperature.setText(temp)
 
     @pyqtSlot()
     def _min_distance(self) -> None:

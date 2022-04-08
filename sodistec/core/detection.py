@@ -4,6 +4,8 @@ import math
 
 import numpy as np
 
+import imutils
+
 from playsound import playsound
 
 try:
@@ -153,10 +155,12 @@ class DetectPerson(QThread):
     def run(self) -> None:
         # Credit to: https://github.com/saimj7/Social-Distancing-Detection-in-Real-Time
         while True:
-            # read the next frame from the file
             if config.USE_THREADING:
                 frame = self.video_capture.read()
                 time.sleep(0.01)
+
+                if frame is None:
+                    continue
             else:
                 (grabbed, frame) = self.video_capture.read()
                 # if the frame was not grabbed, then we have reached the end of the stream
@@ -189,10 +193,9 @@ class DetectPerson(QThread):
 
                         # check to see if the distance between any two
                         # centroid pairs is less than the configured number of pixels
-                        print(f'{jarak = :.2f} | {data[i, j] = :.2f} | {(data[i, j] + jarak) / 2 = :.2f}', end='\r')
 
                         #  if data[i, j] < config.MIN_DISTANCE: #and jarak < config.MIN_RADIUS or data[i, j] < 0:
-                        if (data[i, j] + jarak) / 2 < config.MIN_DISTANCE: #and jarak < config.MIN_RADIUS or data[i, j] < 0:
+                        if data[i, j] < config.MIN_DISTANCE and (jarak < config.MIN_RADIUS or data[i, j] < 0):
 
                             if config.PLAY_BUZZER:
                                 Thread(target=self._play_buzzer).start() # PLAY SOUND!!

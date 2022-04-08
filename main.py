@@ -11,7 +11,7 @@ def main(argv):
     app = QApplication(argv)
     ex = WindowApp()
     app.setStyleSheet(qdarktheme.load_stylesheet("light"))
-    ex.show()
+    ex.showMaximized()
 
     sys.exit(app.exec())
 
