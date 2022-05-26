@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
 from sodistec.apps import config
 
 def to_int(word: str):
-
     try:
         return int(word)
     except ValueError:
@@ -43,13 +42,12 @@ class SetCamera(QDialog):
         sys.exit()
 
     def set_cameras_url(self):
-        text = self.camera_text.toPlainText()
+        text = self.camera_text.toPlainText().strip()
 
-        config.CAMERAS_URL = list(map(to_int, text.strip("").split("\n")))
+        config.CAMERAS_URL = list(map(to_int, text.split("\n")))
 
         with open('camera_url_list', 'w') as f:
             f.write(text)
-
 
         self.hide()
 

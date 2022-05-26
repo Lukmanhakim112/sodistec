@@ -48,8 +48,8 @@ MAX_COL: int = 3
 
 CAMERAS_URL = [
     #  "./sodistec/contrib/video_test.mp4", # testing video, better not to user threading
-    0,
-    #  "rtsp://admin:labiot2018@192.168.210.80/live/ch00_01",
+    #  0,
+    "rtsp://admin:labiot2018_@192.168.230.80/live/ch00_01",
     #  "rtsp://admin:labiot2018@192.168.210.87/live/ch00_01",
     #  "rtsp://admin:Labiot2018_@192.168.210.150/live/ch00_01",
     #  "rtsp://admin:Labiot2018_@192.168.210.192/live/ch00_01",
